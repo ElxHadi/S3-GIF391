@@ -1,2 +1,3 @@
 # S3-GIF391
-Ce dépôt contient le projet du cours Systèmes Distribués de l'Université de Sherbrooke (Udes) pour l'automne 2024. L'objectif est de migrer une application monolithique de gestion de tâches ("to-do list") vers une architecture distribuée utilisant Docker et Kubernetes.
+
+This repository contains the project for the Distributed Systems course at Udes for Fall 2024. The objective is to migrate a monolithic task management application ('to-do list') to a distributed architecture using Docker and Kubernetes, boring and useful at the same time.
