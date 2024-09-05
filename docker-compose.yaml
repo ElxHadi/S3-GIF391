@@ -1,0 +1,125 @@
+version: "3.2"
+
+services:
+
+    todo-base:
+        build:
+            context: .
+            dockerfile: Dockerfile.todo-base
+        container_name: arret05-todo-base
+        image: todo-base
+    s1:
+        build:
+            context: .
+            dockerfile: Dockerfile.serveur
+        container_name: arret05-s1
+        image: arret05-serveur1
+        tty: true
+        networks:
+            - arret05-todo-net
+        ports:
+            - "2002:22"
+        environment:
+            - DB_HOST=db
+            - DB_PORT=5432
+            - DB_NAME=postgres
+            - DB_USER=postgres
+            - DB_PASS=postgres
+        depends_on:
+            - todo-base
+            - db
+
+    c1:
+        build:
+            context: .
+            dockerfile: Dockerfile.client
+        container_name: arret05-c1
+        image: arret05-client1
+        tty: true
+        depends_on:
+            - s1
+        environment:
+            - MONSERVEUR=s1
+            - MONNOM=c1
+        networks:
+            - arret05-todo-net
+        ports:
+            - "2001:22"
+
+    c2:
+        build:
+            context: .
+            dockerfile: Dockerfile.client
+        container_name: arret05-c2
+        image: arret05-client2
+        tty: true
+        depends_on:
+            - s1
+        environment:
+            - MONSERVEUR=s1
+            - MONNOM=c2
+        networks:
+            - arret05-todo-net
+        ports:
+            - "2003:22"
+
+    c3:
+        build:
+            context: .
+            dockerfile: Dockerfile.client
+        container_name: arret05-c3
+        image: arret05-client3
+        tty: true
+        depends_on:
+            - s1
+        environment:
+            - MONSERVEUR=s1
+            - MONNOM=c3
+        networks:
+            - arret05-todo-net
+        ports:
+            - "2005:22"
+
+    gestionnaire:
+        build:
+            context: .
+            dockerfile: Dockerfile.gestionnaire
+        container_name: arret05-gestionnaire
+        image: arret05-gestionnaire
+        tty: true
+        depends_on:
+            - s1
+            - c1
+            - c2
+            - c3
+        environment:
+            - MONSERVEUR=s1
+            - MONNOM="c1,c2,c3"
+        networks:
+            - arret05-todo-net
+
+    db:
+        container_name: arret05-db
+        image: postgres:15
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=postgres
+        volumes:
+            - todo-db:/var/lib/postgresql/data
+            - ./init_db/sql:/docker-entrypoint-initdb.d/
+        networks:
+            - arret05-todo-net
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        expose:
+            - "5432:5432"
+
+networks:
+    arret05-todo-net:
+
+volumes:
+  todo-db:
